@@ -34,7 +34,7 @@ class CateClassifier(nn.Module):
         # 분류기(Classifier) 생성기
         def get_cls(target_size=1):
             return nn.Sequential(
-                nn.Linear(cfg.hidden_size*2, cfg.hidden_size),
+                nn.Linear(cfg.hidden_size, cfg.hidden_size),
                 nn.LayerNorm(cfg.hidden_size),
                 nn.Dropout(cfg.dropout),
                 nn.ReLU(),
@@ -71,8 +71,9 @@ class CateClassifier(nn.Module):
         #img_vec = self.img_encoder(img_feat)
         
         # 이미지벡터와 텍스트벡터를 직렬연결(concatenate)하여 결합벡터 생성
-        comb_vec = torch.cat([text_vec, img_vec], 1)
-
+#        comb_vec = torch.cat([text_vec, img_vec], 1)
+        # output shape (batch size , category 개수 )
+        comb_vec = torch.cat([text_vec], 1)
         # 결합된 벡터로 대카테고리 확률분포 예측
         b_pred = self.b_cls(comb_vec)
         # 결합된 벡터로 중카테고리 확률분포 예측
@@ -91,6 +92,8 @@ class CateClassifier(nn.Module):
             # label은 batch_size x 4를 (batch_size x 1) 4개로 만듦
             b_label, m_label, s_label, d_label = label.split(1, 1)
             # 대카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
+            test_b_view = b_label.view(-1)
+            print(b_label.view(-1))
             b_loss = loss_func(b_pred, b_label.view(-1))
             # 중카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
             m_loss = loss_func(m_pred, m_label.view(-1))
