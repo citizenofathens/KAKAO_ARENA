@@ -88,12 +88,22 @@ class CateClassifier(nn.Module):
         if label is not None:
             # 손실(loss) 함수로 CrossEntropyLoss를 사용
             # label의 값이 -1을 가지는 샘플은 loss계산에 사용 안 함
+            # CroosEntorpyLoss 입력 에는 각 클래스에 대해 정규화되지 않은 원시 점수가 포함될 것으로 예상됩니다
+            # each classes 의 1D tensor optional weight argument unbalanced training set
+            # input: unnormalized scores for each class
+            # (minibatch, size_c ) or (minibatch, c,d1,d2,...dk) with k>=1  k-dimensional case
+            # target : class indices in the range[0,size_c) where c is the number of classes
+            #
             loss_func = nn.CrossEntropyLoss(ignore_index=-1)
             # label은 batch_size x 4를 (batch_size x 1) 4개로 만듦
             b_label, m_label, s_label, d_label = label.split(1, 1)
             # 대카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
             test_b_view = b_label.view(-1)
             print(b_label.view(-1))
+            print(b_pred[0][5])
+            print(b_pred[1].shape)
+            print(b_label[0].shape)
+            # where C is the number of classes
             b_loss = loss_func(b_pred, b_label.view(-1))
             # 중카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
             m_loss = loss_func(m_pred, m_label.view(-1))
