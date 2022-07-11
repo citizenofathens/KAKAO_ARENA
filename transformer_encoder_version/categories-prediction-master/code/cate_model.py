@@ -104,7 +104,9 @@ class CateClassifier(nn.Module):
             print(b_pred[1].shape)
             print(b_label[0].shape)
             # where C is the number of classes
+            # input ( minimatch, loss) ->2차원 (batch,class개수(C)) target ( minibatch,) 1차원이므로 [5,18,21 ...]
             b_loss = loss_func(b_pred, b_label.view(-1))
+            # 전체에 대한 평균 loss값이 나온다
             # 중카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
             m_loss = loss_func(m_pred, m_label.view(-1))
             # 소카테고리의 예측된 확률분포와 정답확률 분포의 차이를 손실로 반환
