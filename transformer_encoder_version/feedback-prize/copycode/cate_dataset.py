@@ -25,6 +25,7 @@ class CateDataset(Dataset):
 
 
         # logloss 평가방법 사용하므로 ineffective, adequate, effective가 어떤 값으로 분류되었는 지 확인
+        # 0: adequate , 1: effective, 2: ineffective
         df_data['discourse_effectiveness'] = le.fit_transform(df_data['discourse_effectiveness'])
         self.labels = df_data['discourse_effectiveness'].map(lambda x : np.array([x])).values
 
@@ -54,7 +55,7 @@ class CateDataset(Dataset):
         tokens = " ".join(tokens)
 
         # 토큰을 토큰에 대응되는 인덱스로 변환
-
+        # token_ids 가 제대로 tokenzing  되지않았다 실무하면서 정수 인코딩부터 제대로 해야된다는 것을 보고 두렵지않으면서 알게 되었다. 이런 기초
         token_ids = [self.token2id[tok] if tok in self.token2id else 0 for tok in tokens.split()]
 
         # token_ids 의 길이가 max_len 보다 길 면 잘라서 버림

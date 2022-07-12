@@ -1,3 +1,4 @@
+import gc
 import os
 import time
 import math
@@ -235,7 +236,8 @@ def main():
                           f'ep{epoch}_s{CFG.seed}_fold{args.fold}.pt')
         # torch.nn.DataParallel 로 감싸인 경우 원래의 model을 가져옴
         model_to_save = model.module if hasattr(model, 'module') else model
-
+        # 1epoch 마다 gc collect
+        gc.collect()
     print('training done')
 
     #모델의 파라미터를 저장함
@@ -306,6 +308,7 @@ def train(train_loader, model, optimizer, epoch, scheduler):
 
         batch_size = token_ids.size(0)
 
+        token_ids.flatten()
 
         # model은 배치 데이터를 입력받아서 예측 결과 및 loss 반환=
         # model 은 인스턴스이나 __call__함수가 추가돼 함수처럼 호출이 가능
@@ -496,6 +499,11 @@ def calc_cate_acc(pred, label):
     # b_pred type : tensor
     b_pred = pred
     _, b_idx = b_pred[0].max(1)
+    print(label[:20])
+    print(b_idx[:20])
+    print((b_idx == label[:,0]).sum().item())
+    print((label[:,0]>0).sum().item())
+
     b_acc = (b_idx == label[:,0]).sum().item() / (label[:,0]>0).sum().item()
     return b_acc
 
