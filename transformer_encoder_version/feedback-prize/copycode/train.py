@@ -498,7 +498,9 @@ def calc_cate_acc(pred, label):
     """
     # b_pred type : tensor
     b_pred = pred
-    _, b_idx = b_pred[0].max(1)
+    _, b_idx = b_pred[0].max(dim=1)
+    # label과 idx 모두 정수 값
+    print(b_pred[:10])
     print(label[:20])
     print(b_idx[:20])
     print((b_idx == label[:,0]).sum().item())

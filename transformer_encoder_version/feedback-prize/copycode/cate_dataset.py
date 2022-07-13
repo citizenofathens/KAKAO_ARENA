@@ -11,7 +11,7 @@ class CateDataset(Dataset):
     데이터셋에서 학습에 필요한 형태로 변환된 샘플 하나를 반환
     """
 
-    def __init__(self, df_data, token2id ,tokens_max_len=64, type_vocab_size=30):
+    def __init__(self, df_data, token2id ,tokens_max_len=300, type_vocab_size=30):
         """
         매개변수
         df_data : 상품타이틀 , 카테고리 등의 정보를 가지는 데이터프레임
@@ -30,7 +30,8 @@ class CateDataset(Dataset):
         self.labels = df_data['discourse_effectiveness'].map(lambda x : np.array([x])).values
 
         self.token2id = token2id
-        self.p = re.compile('_[^_]+') # _기호를 기준으로 나누기 위한 컴파일된 정규식
+#        self.p = re.compile('_[^_]+') # _기호를 기준으로 나누기 위한 컴파일된 정규식
+        self.p = re.compile('[^_]+') # _기호를 기준으로 나누기 위한 컴파일된 정규식
         self.type_vocab_size = type_vocab_size
 
 
@@ -50,12 +51,12 @@ class CateDataset(Dataset):
         # 상품명을 _ 기호를 기준으로 분리하여 파이썬 리스트로 저장
 
         tokens = self.p.findall(tokens)
-
+        print('tokens len :{}'.format(len(tokens)))
         token_types = [type_id for type_id, word in enumerate(tokens) for _ in word.split()]
         tokens = " ".join(tokens)
 
         # 토큰을 토큰에 대응되는 인덱스로 변환
-        # token_ids 가 제대로 tokenzing  되지않았다 실무하면서 정수 인코딩부터 제대로 해야된다는 것을 보고 두렵지않으면서 알게 되었다. 이런 기초
+        # token_ids 가 제대로 tokenzing  되지않았다 실무하면서 정수 인코딩부터 제대로 해야된다는 것을 보고 다른 코드를 필사하면서도 몰라도 두렵지않으면서 알게 되었다. 이런 기초
         token_ids = [self.token2id[tok] if tok in self.token2id else 0 for tok in tokens.split()]
 
         # token_ids 의 길이가 max_len 보다 길 면 잘라서 버림
@@ -65,8 +66,6 @@ class CateDataset(Dataset):
 
         #token_ids 의 길이가 max_len보다 짧으면 짧은만큼 PAD값 0으로 채워넣음
         #token_ids 중 값이 있는 곳은 1, 그 외는 0으로 채운 token_mask 생성
-
-
         token_mask = [1] * len(token_ids)
         token_pad = [0] * (self.tokens_max_len- len(token_ids))
         token_ids += token_pad
